@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Immersive Learning &#8211; Hoc sinh Import Generator v2.1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#0f0e0c;color:#e8e5de;min-height:100vh;line-height:1.6}
+.hd{background:rgba(15,14,12,.92);border-bottom:1px solid #2a2820;padding:0 2rem;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.hd-inner{max-width:1020px;margin:0 auto;height:62px;display:flex;align-items:center;gap:.85rem}
+.logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#059669,#34d399);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.5px;box-shadow:0 0 16px rgba(16,185,129,.35)}
+.hd-title{font-size:1rem;font-weight:600;color:#f0ece4}
+.hd-badge{font-size:.68rem;font-weight:600;background:linear-gradient(135deg,#d97706,#f59e0b);color:#000;padding:.2rem .55rem;border-radius:20px;letter-spacing:.5px}
+.main{max-width:1020px;margin:0 auto;padding:2.5rem 1.5rem 8rem}
+.card{background:#181714;border:1px solid #2a2820;border-radius:14px;box-shadow:0 4px 24px rgba(0,0,0,.3);margin-bottom:1.5rem;overflow:hidden;transition:border-color .2s}
+.card:hover{border-color:#3a3630}
+.card-head{padding:1.15rem 1.6rem;border-bottom:1px solid #2a2820;display:flex;align-items:center;gap:.8rem;background:#1c1a17}
+.step{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(16,185,129,.3)}
+.card-title{font-size:.92rem;font-weight:600;color:#f0ece4}
+.card-body{padding:1.5rem 1.6rem}
+.dropz{border:2px dashed #3a3630;border-radius:12px;padding:2rem;text-align:center;cursor:pointer;background:#161412;position:relative;transition:all .25s}
+.dropz:hover{border-color:#059669;background:rgba(5,150,105,.06)}
+.dropz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dropz-label{font-weight:500;color:#c0bdb5;font-size:.875rem}
+.dropz-sub{font-size:.75rem;color:#6b6760;margin-top:.3rem}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.ff{display:flex;flex-direction:column;gap:.35rem}
+label{font-size:.78rem;font-weight:500;color:#8a8780}
+input[type=text], input[type=number], select{padding:.5rem .8rem;border:1px solid #2a2820;border-radius:7px;font-size:.875rem;font-family:inherit;outline:none;background:#1c1a17;color:#e8e5de;transition:border-color .2s,box-shadow .2s}
+input:focus, select:focus{border-color:#059669;box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+input[type=file]{font-size:.8rem;cursor:pointer;color:#8a8780}
+.mt{width:100%;border-collapse:collapse;margin-top:1rem}
+.mt th{text-align:left;font-size:.72rem;color:#6b6760;padding:.55rem .6rem;background:#161412;border-bottom:1px solid #2a2820}
+.mt td{padding:.35rem .4rem;border-bottom:1px solid #1e1c19}
+.mt-inp{width:100%;padding:.35rem .55rem;border:1px solid #2a2820;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:.82rem;background:#1c1a17;color:#e8e5de;outline:none}
+.mt-inp:focus{border-color:#059669}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1.1rem;border-radius:8px;font-size:.845rem;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .2s;letter-spacing:.01em}
+.btn-primary{background:linear-gradient(135deg,#059669,#10b981);color:#fff;box-shadow:0 2px 12px rgba(16,185,129,.25)}
+.btn-primary:hover{background:linear-gradient(135deg,#047857,#059669);box-shadow:0 4px 18px rgba(16,185,129,.35);transform:translateY(-1px)}
+.btn-secondary{background:#1c1a17;color:#c0bdb5;border-color:#2a2820}
+.btn-secondary:hover{background:#242118;border-color:#3a3630}
+.btn-excel{background:linear-gradient(135deg,#d97706,#f59e0b);color:#000;box-shadow:0 2px 12px rgba(245,158,11,.2)}
+.btn-excel:hover{background:linear-gradient(135deg,#b45309,#d97706);transform:translateY(-1px)}
+.btn-danger{background:linear-gradient(135deg,#7f1d1d,#ef4444);color:#fff;box-shadow:0 2px 12px rgba(239,68,68,.2)}
+.btn-danger:hover{background:linear-gradient(135deg,#6b1818,#dc2626);transform:translateY(-1px)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+.sub-section{margin-top:1.5rem;border-top:1px solid #2a2820;padding-top:1.5rem}
+.sub-label{font-size:.8rem;font-weight:600;color:#059669;margin-bottom:.3rem}
+.sub-hint{font-size:.73rem;color:#6b6760;margin-bottom:.6rem}
+.radio-group{display:flex;flex-direction:column;gap:.45rem}
+.radio-opt{display:flex;align-items:flex-start;gap:.55rem;cursor:pointer;font-size:.84rem;color:#c0bdb5}
+.radio-opt input{margin-top:.18rem;accent-color:#059669}
+.log{background:#0a0908;color:#a3e6c8;padding:1rem 1.2rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.78rem;margin-top:1rem;display:none;max-height:220px;overflow-y:auto;border:1px solid #2a2820}
+.pt{width:100%;border-collapse:collapse;font-size:.73rem;white-space:nowrap;margin-top:1rem}
+.pt th{background:#161412;padding:.5rem .8rem;text-align:left;border-bottom:1px solid #2a2820;color:#6b6760;font-weight:500}
+.pt td{padding:.4rem .8rem;border-bottom:1px solid #1e1c19;font-family:'JetBrains Mono',monospace;color:#c0bdb5}
+.pt tr:hover td{background:#1c1a17}
+.dl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:1.5rem}
+.dl-card{background:#1c1a17;border:1px solid #2a2820;border-radius:12px;padding:1.25rem;display:flex;flex-direction:column;gap:.85rem;transition:border-color .25s,box-shadow .25s}
+.dl-card:hover{border-color:#3a3630;box-shadow:0 4px 20px rgba(0,0,0,.25)}
+.dl-card-header{display:flex;align-items:center;gap:.7rem}
+.dl-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.dl-icon-existing{background:rgba(16,185,129,.15)}
+.dl-icon-new{background:rgba(59,130,246,.15)}
+.dl-icon-suspended{background:rgba(239,68,68,.15)}
+.dl-card-name{font-size:.82rem;font-weight:700;color:#f0ece4}
+.dl-card-count{font-size:.73rem;color:#6b6760;margin-top:.1rem}
+.dl-card-desc{font-size:.75rem;color:#8a8780;line-height:1.5}
+.dl-card-actions{display:flex;gap:.6rem;flex-wrap:wrap}
+.ok-msg{display:none;font-weight:500;margin-top:.5rem;font-size:.82rem;padding:.4rem .75rem;border-radius:6px}
+.ok-green{color:#34d399;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.15)}
+.ok-yellow{color:#fbbf24;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2)}
+.ok-red{color:#f87171;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15)}
+.section-label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#6b6760;margin-bottom:.75rem}
+hr.dim{border:none;border-top:1px solid #2a2820;margin:1.25rem 0}
+
+/* Suspended review panel */
+.sus-review-panel{display:none;background:#120a08;border:1px solid rgba(239,68,68,.3);border-radius:10px;margin-top:1.2rem;overflow:hidden}
+.sus-review-header{padding:.75rem 1rem;background:rgba(239,68,68,.1);border-bottom:1px solid rgba(239,68,68,.2);display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.sus-review-title{font-size:.8rem;font-weight:700;color:#f87171}
+.sus-review-hint{font-size:.72rem;color:#fca5a5;margin-top:.2rem;line-height:1.5}
+.sus-table{width:100%;border-collapse:collapse;font-size:.74rem}
+.sus-table th{background:#1a0c0c;padding:.5rem .8rem;text-align:left;color:#f87171;font-weight:600;font-size:.7rem;border-bottom:1px solid rgba(239,68,68,.15)}
+.sus-table td{padding:.4rem .8rem;border-bottom:1px solid #1e1412;font-family:'JetBrains Mono',monospace;color:#fca5a5;vertical-align:middle}
+.sus-table tr:last-child td{border-bottom:none}
+.sus-table tr.unchecked td{color:#4a3030;text-decoration:line-through}
+.sus-cb{accent-color:#ef4444;width:14px;height:14px;cursor:pointer}
+.sus-footer{padding:.65rem 1rem;background:#1a0c0c;border-top:1px solid rgba(239,68,68,.15);display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.sus-sel-count{font-size:.75rem;color:#f87171;flex:1}
+
+@media(max-width:700px){.fg,.dl-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="hd">
+  <div class="hd-inner">
+    <div class="logo">IMM</div>
+    <span class="hd-title">Student Import Generator</span>
+    <span class="hd-badge">v2.1</span>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- STEP 1 -->
+  <div class="card">
+    <div class="card-head"><span class="step">1</span><span class="card-title">Upload Data Files</span></div>
+    <div class="card-body">
+
+      <div id="dropz" class="dropz" style="padding:1.5rem">
+        <input type="file" id="file-inp" accept=".xlsx,.xls"/>
+        <div class="dropz-label">&#128194; Drop <strong>Current Year Hoc Sinh</strong> Excel here (Required)</div>
+        <div class="dropz-sub">Supports .xlsx / .xls with multiple sheets</div>
+      </div>
+      <div id="file-ok" class="ok-msg ok-green"></div>
+
+      <div class="sub-section">
+        <div class="sub-label">2. Reference File (Previous Year) &#8212; Optional</div>
+        <div class="sub-hint">Upload last year&#8217;s &#8220;To Send&#8221; Excel (the registration form + added username &amp; password columns). Used to: (a) reuse existing usernames for returning students, and (b) detect unenrolled students to suspend.</div>
+        <input type="file" id="ref-inp" accept=".xlsx,.xls,.csv" style="width:100%"/>
+        <div id="ref-ok" class="ok-msg ok-green"></div>
+      </div>
+
+      <div class="sub-section">
+        <div class="sub-label" style="color:#8a8780">3. Global Blacklist (Optional)</div>
+        <div class="sub-hint">Upload <code style="background:#1c1a17;padding:.1rem .3rem;border-radius:3px;font-family:monospace;font-size:.78rem">Users.csv</code> from Moodle to prevent duplicate usernames.</div>
+        <input type="file" id="users-inp" accept=".csv,.xlsx" style="width:100%"/>
+        <div id="users-ok" class="ok-msg ok-red"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="card">
+    <div class="card-head"><span class="step">2</span><span class="card-title">Configuration</span></div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="ff"><label>School Short Name</label><input type="text" id="cfg-school" value="LTV(1)"/></div>
+        <div class="ff"><label>Academic Year</label><input type="text" id="cfg-year" value="2026"/></div>
+        <div class="ff"><label>Cohort 1</label><input type="text" id="cfg-cohort1" value="26_IMMERSIVE_students"/></div>
+        <div class="ff">
+          <label>School Level (for email)</label>
+          <select id="cfg-level">
+            <option value="p">Primary (p)</option>
+            <option value="ls">Lower Secondary (ls)</option>
+          </select>
+        </div>
+        <div class="ff"><label>Starting Number (for dummy email)</label><input type="number" id="cfg-startnum" value="1"/></div>
+      </div>
+      <div style="margin-top:1.5rem">
+        <label style="display:block;margin-bottom:.5rem;color:#8a8780">Fallback Username Strategy</label>
+        <div class="radio-group">
+          <label class="radio-opt"><input type="radio" name="uname-strat" value="name-year" checked/><div>Ten + Initials + Year (e.g. honglm26)</div></label>
+          <label class="radio-opt"><input type="radio" name="uname-strat" value="email-prefix"/><div>Dummy Email Prefix (e.g. 180826_p_immersive_001)</div></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="card">
+    <div class="card-head"><span class="step">3</span><span class="card-title">Class Mapping</span></div>
+    <div class="card-body">
+      <div style="font-size:.83rem;color:#6b6760">Map class codes (e.g. 1/2 or 1A2) to platform format (e.g. 1.2). Auto-detected on upload.</div>
+      <table class="mt">
+        <thead><tr><th>Raw Class</th><th></th><th>Platform Name</th><th>Grade</th></tr></thead>
+        <tbody id="mt-body"></tbody>
+      </table>
+      <button class="btn btn-secondary" style="margin-top:1rem" onclick="addRow()">+ Add Row</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="card">
+    <div class="card-head"><span class="step">4</span><span class="card-title">Generate &amp; Download</span></div>
+    <div class="card-body">
+      <div style="display:flex;gap:.8rem;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-secondary" onclick="run(false)">&#128065; Preview 10 Rows</button>
+        <button class="btn btn-primary" id="dl-btn" onclick="run(true,'csv')" disabled>&#11015; Download Full Import CSV</button>
+        <button class="btn btn-excel" id="dl-excel-btn" onclick="run(true,'excel')" disabled>&#11015; Download Highlighted Excel</button>
+      </div>
+      <div id="log" class="log"></div>
+      <div style="overflow-x:auto"><table class="pt" id="pt"></table></div>
+
+      <hr class="dim"/>
+      <div class="section-label">&#128229; Separate Lists (v2.1)</div>
+      <div class="dl-grid">
+        <!-- Existing -->
+        <div class="dl-card">
+          <div class="dl-card-header">
+            <div class="dl-icon dl-icon-existing">&#128994;</div>
+            <div>
+              <div class="dl-card-name">Existing Students</div>
+              <div class="dl-card-count" id="cnt-existing">Run Generate first</div>
+            </div>
+          </div>
+          <div class="dl-card-desc">Students in <strong>this year</strong> who already have a Moodle account (matched from reference file).</div>
+          <div class="dl-card-actions">
+            <button class="btn btn-secondary" id="dl-existing-csv" onclick="downloadSeparate('existing','csv')" disabled>CSV</button>
+            <button class="btn" id="dl-existing-xl" onclick="downloadSeparate('existing','excel')" disabled style="background:linear-gradient(135deg,#065f46,#059669);color:#fff;font-size:.78rem;border:none">Excel</button>
+          </div>
+        </div>
+        <!-- New -->
+        <div class="dl-card">
+          <div class="dl-card-header">
+            <div class="dl-icon dl-icon-new">&#128309;</div>
+            <div>
+              <div class="dl-card-name">New Students</div>
+              <div class="dl-card-count" id="cnt-new">Run Generate first</div>
+            </div>
+          </div>
+          <div class="dl-card-desc">Students in <strong>this year</strong> with <strong>no</strong> existing account &#8212; brand-new ones to create.</div>
+          <div class="dl-card-actions">
+            <button class="btn btn-secondary" id="dl-new-csv" onclick="downloadSeparate('new','csv')" disabled>CSV</button>
+            <button class="btn" id="dl-new-xl" onclick="downloadSeparate('new','excel')" disabled style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;font-size:.78rem;border:none">Excel</button>
+          </div>
+        </div>
+        <!-- Suspended -->
+        <div class="dl-card" style="border-color:rgba(239,68,68,.2)">
+          <div class="dl-card-header">
+            <div class="dl-icon dl-icon-suspended">&#128308;</div>
+            <div>
+              <div class="dl-card-name">Suspended / Unenrolled</div>
+              <div class="dl-card-count" id="cnt-suspended">Run Generate first</div>
+            </div>
+          </div>
+          <div class="dl-card-desc">Students in the <strong>reference file</strong> not found in this year&#8217;s list. <strong>Review the list below before downloading.</strong></div>
+          <div class="dl-card-actions">
+            <button class="btn btn-secondary" id="dl-sus-csv" onclick="downloadSuspended('csv')" disabled>CSV</button>
+            <button class="btn btn-danger" id="dl-sus-xl" onclick="downloadSuspended('excel')" disabled>Excel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Suspended Review Panel -->
+      <div class="sus-review-panel" id="sus-review-panel">
+        <div class="sus-review-header">
+          <div>
+            <div class="sus-review-title">&#9888; Review Before Downloading &#8212; Students to Suspend</div>
+            <div class="sus-review-hint">Uncheck any student who should NOT be suspended (e.g. they may be in the current year list under a slightly different name spelling).</div>
+          </div>
+          <button class="btn btn-secondary" style="font-size:.75rem;padding:.35rem .7rem;white-space:nowrap" onclick="toggleAllSus(this)">Uncheck All</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="sus-table">
+            <thead><tr><th style="width:36px">&#10003;</th><th>Username</th><th>Firstname (T&#234;n)</th><th>Lastname (H&#7885; t&#234;n &#273;&#7879;m)</th><th>Matched as</th></tr></thead>
+            <tbody id="sus-tbody"></tbody>
+          </table>
+        </div>
+        <div class="sus-footer">
+          <span class="sus-sel-count" id="sus-sel-count"></span>
+          <button class="btn btn-secondary" style="font-size:.75rem;padding:.35rem .7rem" onclick="toggleAllSus(this,'check')">Check All</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<script>
+// =====================================================================
+// STATE
+// =====================================================================
+let students=[], mapRows=[], rowId=0;
+let refStudents=[];
+let globalUsernames=new Set();
+let rowsAll=[], rowsExisting=[], rowsNew=[], rowsSuspended=[];
+// rowsSuspended entries: {username, firstname, lastname, checked:true}
+
+const HEADERS=['username','firstname','lastname','cohort1','cohort2','Institution','Department','password','email','course1','group1','role1','course2','group2','role2','course3','group3','role3'];
+const SUSPEND_HEADERS=['username','firstname','lastname','suspended'];
+
+// =====================================================================
+// EVENTS
+// =====================================================================
+document.getElementById('file-inp').addEventListener('change',e=>{const f=e.target.files[0];if(f)loadFile(f);});
+document.getElementById('ref-inp').addEventListener('change',e=>{const f=e.target.files[0];if(f)loadRefFile(f);});
+document.getElementById('users-inp').addEventListener('change',e=>{const f=e.target.files[0];if(f)loadUsersFile(f);});
+
+// =====================================================================
+// UTILS
+// =====================================================================
+function removeDiacritics(str){
+  return String(str||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\u0111/g,'d').replace(/\u0110/g,'D');
+}
+function norm(s){return removeDiacritics(s).toLowerCase().replace(/\s+/g,'');}
+function makeKey(a,b){return a+'||'+b;}
+
+// =====================================================================
+// DATE HELPERS
+// =====================================================================
+function parseDate(raw, yearCell){
+  if(!raw&&raw!==0) return null;
+  if(typeof raw==='number'&&raw>10000){const d=new Date(Math.round((raw-25569)*86400*1000));return{d:d.getDate(),m:d.getMonth()+1,y:d.getFullYear()};}
+  const s=String(raw).trim();
+  let m=s.match(/(\d{1,2})\s*[\/\-\.]\s*(\d{1,2})\s*[\/\-\.]\s*(\d{2,4})/);
+  if(m){let y=parseInt(m[3],10);if(y<100)y+=(y>30?1900:2000);return{d:parseInt(m[1],10),m:parseInt(m[2],10),y};}
+  m=s.match(/(\d{1,2})\s*[\/\-\.]\s*(\d{1,2})/);
+  if(m){let y=yearCell?parseInt(String(yearCell).replace(/\D/g,''),10):2018;if(isNaN(y))y=2018;if(y<100)y+=(y>30?1900:2000);return{d:parseInt(m[1],10),m:parseInt(m[2],10),y};}
+  return null;
+}
+function parseDMY(dRaw,mRaw,yRaw){
+  let mN=parseInt(String(mRaw||'').replace(/\D/g,''),10);if(isNaN(mN)||mN<1||mN>12)return null;
+  let dN=dRaw?parseInt(String(dRaw).replace(/\D/g,''),10):1;if(isNaN(dN)||dN<1)dN=1;
+  let yN=yRaw?parseInt(String(yRaw).replace(/\D/g,''),10):2018;if(isNaN(yN))yN=2018;if(yN<100)yN+=(yN>30?1900:2000);
+  return{d:dN,m:mN,y:yN};
+}
+
+// =====================================================================
+// LOAD CURRENT YEAR FILE
+// =====================================================================
+function loadFile(file){
+  const rd=new FileReader();
+  rd.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      students=[];
+      for(const sn of wb.SheetNames) parseData(XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:null}),sn);
+      if(!students.length) throw new Error("No student data found! Make sure the file has 'Ho va ten' or 'Ho ten' headers.");
+      const ok=document.getElementById('file-ok');ok.style.display='block';
+      ok.innerText='Loaded '+students.length+' students from '+wb.SheetNames.length+' sheet(s)';
+      autoDetectClasses();
+    }catch(err){alert(err.message);}
+  };
+  rd.readAsArrayBuffer(file);
+}
+
+function parseData(rows,sheetName){
+  let hRow=-1,cHo=-1;
+  for(let i=0;i<Math.min(rows.length,15);i++){
+    const r=rows[i];if(!r)continue;
+    for(let j=0;j<r.length;j++){
+      const vn=norm(r[j]||'');
+      if(vn.includes('tendem')||vn.includes('hovaten')||vn.includes('hoten')){hRow=i;cHo=j;break;}
+    }
+    if(hRow!==-1)break;
+  }
+  if(hRow===-1)return;
+  let cTen=-1,cDob=-1,cCls=-1,cUname=-1,cPwd=-1,cDay=-1,cMonth=-1,cYear=-1;
+  for(let i=hRow;i<Math.min(rows.length,hRow+3);i++){
+    const r=rows[i];if(!r)continue;
+    for(let j=0;j<r.length;j++){
+      const v=String(r[j]||'').toLowerCase().replace(/\s+/g,' ').trim();const vn=norm(r[j]||'');
+      if(!v)continue;
+      if(vn==='ten'){if(cTen===-1)cTen=j;}
+      else if(vn==='ngay'||vn==='ngaysinh'){if(cDay===-1)cDay=j;}
+      else if(vn==='thang'||vn==='thangsinh'||vn==='thg'||v==='month'){if(cMonth===-1)cMonth=j;}
+      else if(vn==='nam'||vn==='namsinh'){if(cYear===-1)cYear=j;}
+      else if(vn.includes('ngaysinh')||vn.includes('namsinh')||v.includes('dob')){if(cDob===-1)cDob=j;}
+      else if(vn==='lop'||v.includes('class')){if(cCls===-1)cCls=j;}
+      else if(vn.includes('dangnhap')||v.includes('username')||vn.includes('taikhoan')||v==='account'){if(cUname===-1)cUname=j;}
+      else if(vn.includes('matkhau')||v.includes('password')||v==='pass'){if(cPwd===-1)cPwd=j;}
+    }
+  }
+  // Skip extra header rows
+  let dSR=hRow+1;
+  if(hRow+1<rows.length){const nR=rows[hRow+1];let ih=false;for(let j=0;j<nR.length;j++){const v2=norm(nR[j]||'');if(!v2)continue;if(v2.includes('dangnhap')||v2.includes('taikhoan')||v2.includes('matkhau')||v2.includes('password')||v2==='lop'||v2.includes('class')||v2==='pass'){ih=true;break;}}if(ih)dSR=hRow+2;}
+  for(let i=dSR;i<rows.length;i++){
+    const r=rows[i];if(!r)continue;
+    let ho=String(r[cHo]||'').trim();if(!ho||norm(ho).includes('hovaten'))continue;
+    let ten=cTen!==-1?String(r[cTen]||'').trim():'';
+    if(cTen===-1&&ho){const pts=ho.split(/\s+/);if(pts.length>1){ten=pts.pop();ho=pts.join(' ');}else{ten=ho;ho='';}}
+    let date={d:1,m:1,y:2018};let dStr='';let dp=false;
+    if(cDob!==-1&&r[cDob]!=null){const res=parseDate(r[cDob],cYear!==-1?r[cYear]:null);if(res){date=res;dp=true;}}
+    if(!dp&&cMonth!==-1&&r[cMonth]!=null){const res=parseDMY(cDay!==-1?r[cDay]:null,r[cMonth],cYear!==-1?r[cYear]:null);if(res){date=res;dp=true;}}
+    if(!dp&&cDob!==-1){const res=parseDMY(r[cDob],r[cDob+1],r[cDob+2]);if(res){date=res;dp=true;}}
+    dStr=date.d+'/'+date.m+'/'+date.y;
+    let rawCls=cCls!==-1?String(r[cCls]||'').trim():'';
+    if(!rawCls){const sm=sheetName.match(/\d+[a-zA-Z\/\.]\d+/);rawCls=sm?sm[0]:sheetName.replace(/^l[o]p\s*/i,'').trim();}
+    let eu=cUname!==-1?String(r[cUname]||'').trim():'';if(eu.startsWith('#'))eu='';
+    let ep=cPwd!==-1?String(r[cPwd]||'').trim():'';if(ep.startsWith('#'))ep='';
+    students.push({ho,ten,rawCls,date,dStr,existingUsername:eu,existingPassword:ep});
+  }
+}
+
+// =====================================================================
+// LOAD REFERENCE FILE
+// =====================================================================
+function loadRefFile(file){
+  const rd=new FileReader();
+  rd.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      refStudents=[];
+      let totalWithUname=0;
+      for(const sn of wb.SheetNames){
+        const before=refStudents.length;
+        parseRefSheet(XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:null}),refStudents);
+        totalWithUname+=refStudents.length-before;
+      }
+      const ok=document.getElementById('ref-ok');ok.style.display='block';
+      if(totalWithUname===0){
+        ok.className='ok-msg ok-yellow';
+        ok.innerText='Warning: Loaded 0 students with username from reference. Make sure the file has a "Ten dang nhap" / "username" column. Suspended list will be empty.';
+      }else{
+        ok.className='ok-msg ok-green';
+        ok.innerText='Loaded '+refStudents.length+' reference students ('+totalWithUname+' with username for matching & suspended detection).';
+      }
+    }catch(err){alert('Reference file error: '+err.message);}
+  };
+  rd.readAsArrayBuffer(file);
+}
+
+function parseRefSheet(rows,out){
+  let hRow=-1,cHo=-1;
+  for(let i=0;i<Math.min(rows.length,15);i++){
+    const r=rows[i];if(!r)continue;
+    for(let j=0;j<r.length;j++){
+      const vn=norm(r[j]||'');const v=String(r[j]||'').toLowerCase().replace(/\s+/g,' ').trim();
+      if(vn.includes('tendem')||vn.includes('hovaten')||vn.includes('hoten')||v==='firstname'){hRow=i;cHo=j;break;}
+    }
+    if(hRow!==-1)break;
+  }
+  if(hRow===-1)return;
+  let cTen=-1,cDob=-1,cUname=-1,cDay=-1,cMonth=-1,cYear=-1;
+  // Scan up to 3 header rows (handles merged header rows like "Tai khoan Immersive" over "Ten dang nhap" / "Mat khau")
+  for(let i=hRow;i<Math.min(rows.length,hRow+4);i++){
+    const r=rows[i];if(!r)continue;
+    for(let j=0;j<r.length;j++){
+      const v=String(r[j]||'').toLowerCase().replace(/\s+/g,' ').trim();const vn=norm(r[j]||'');
+      if(!v)continue;
+      if(vn==='ten'||v==='lastname'){if(cTen===-1)cTen=j;}
+      else if(vn==='ngay'||vn==='ngaysinh'||v==='day'){if(cDay===-1)cDay=j;}
+      else if(vn==='thang'||vn==='thangsinh'||vn==='thg'||v==='month'){if(cMonth===-1)cMonth=j;}
+      else if(vn==='nam'||vn==='namsinh'||v==='year'){if(cYear===-1)cYear=j;}
+      else if(vn.includes('ngaysinh')||vn.includes('namsinh')||v.includes('dob')){if(cDob===-1)cDob=j;}
+      // Username: "Ten dang nhap", "Tai khoan", "username", "account"
+      else if(vn.includes('dangnhap')||v.includes('username')||vn.includes('taikhoan')||v==='account'||v.includes('user name')){if(cUname===-1)cUname=j;}
+    }
+  }
+  // Find first actual data row (skip extra header/merged rows)
+  let dSR=hRow+1;
+  for(let i=hRow+1;i<Math.min(rows.length,hRow+4);i++){
+    const r=rows[i];if(!r)continue;
+    const hoVal=String(r[cHo]||'').trim();const unVal=cUname!==-1?String(r[cUname]||'').trim():'';
+    // If this row looks like a header (no numeric STT in col 0 and no real name), skip it
+    const sttVal=String(r[0]||'').trim();
+    if(!hoVal||norm(hoVal).includes('hovaten')||norm(hoVal).includes('hoten')){dSR=i+1;continue;}
+    break;
+  }
+  for(let i=dSR;i<rows.length;i++){
+    const r=rows[i];if(!r)continue;
+    let ho=String(r[cHo]||'').trim();if(!ho)continue;
+    if(norm(ho).includes('hovaten')||norm(ho).includes('hoten'))continue;
+    let ten=cTen!==-1?String(r[cTen]||'').trim():'';
+    if(cTen===-1&&ho){const pts=ho.split(/\s+/);if(pts.length>1){ten=pts.pop();ho=pts.join(' ');}else{ten=ho;ho='';}}
+    let un=cUname!==-1?String(r[cUname]||'').trim():'';
+    let dStr='';
+    if(cDob!==-1&&r[cDob]!=null){const res=parseDate(r[cDob],cYear!==-1?r[cYear]:null);if(res)dStr=res.d+'/'+res.m+'/'+res.y;}
+    if(!dStr&&cMonth!==-1&&r[cMonth]!=null){const res=parseDMY(cDay!==-1?r[cDay]:null,r[cMonth],cYear!==-1?r[cYear]:null);if(res)dStr=res.d+'/'+res.m+'/'+res.y;}
+    const cT=norm(ten);const cH=norm(ho);
+    // Always add to refStudents (for name lookup); un may be empty for name-only rows
+    out.push({cleanTen:cT,cleanHo:cH,dStr,username:un,rawFirstname:ten,rawLastname:ho});
+  }
+}
+
+// =====================================================================
+// LOAD USERS (BLACKLIST) FILE
+// =====================================================================
+function loadUsersFile(file){
+  const rd=new FileReader();
+  rd.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array'});globalUsernames.clear();
+      const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:null});
+      let cU=-1;for(let j=0;j<(rows[0]||[]).length;j++){if(String(rows[0][j]||'').toLowerCase().trim()==='username')cU=j;}
+      if(cU===-1)throw new Error("Could not find 'username' header in the first row.");
+      for(let i=1;i<rows.length;i++){let u=String(rows[i][cU]||'').trim().toLowerCase();if(u)globalUsernames.add(u);}
+      const ok=document.getElementById('users-ok');ok.style.display='block';ok.innerText='Loaded '+globalUsernames.size+' existing Moodle usernames.';
+    }catch(err){alert('Users file error: '+err.message);}
+  };
+  rd.readAsArrayBuffer(file);
+}
+
+// =====================================================================
+// CLASS MAPPING
+// =====================================================================
+function addRow(raw,tr,gr){
+  raw=raw||'';tr=tr||'';gr=gr||'';
+  const id=rowId++;const tb=document.getElementById('mt-body');
+  const row=document.createElement('tr');row.id='mr-'+id;
+  row.innerHTML='<td><input class="mt-inp" value="'+raw+'" oninput="updRow('+id+',\'raw\',this.value)"/></td><td style="text-align:center;color:#6b6760">&#8594;</td><td><input class="mt-inp" value="'+tr+'" oninput="updRow('+id+',\'translated\',this.value)"/></td><td><input class="mt-inp" value="'+gr+'" oninput="updRow('+id+',\'grade\',this.value)"/></td>';
+  tb.appendChild(row);mapRows.push({id,raw,translated:tr,grade:gr});
+}
+function updRow(id,field,val){
+  const r=mapRows.find(x=>x.id===id);if(!r)return;r[field]=val;
+  if(field==='raw'){
+    const gm=val.match(/^(\d+)/);if(gm){r.grade=gm[1];document.getElementById('mr-'+id).querySelector('td:nth-child(4) input').value=gm[1];}
+    const tm=val.match(/^(\d+)[A\/](\d+)$/i);if(tm&&!r.translated){r.translated=tm[1]+'.'+tm[2];document.getElementById('mr-'+id).querySelector('td:nth-child(3) input').value=r.translated;}
+  }
+}
+function autoDetectClasses(){
+  document.getElementById('mt-body').innerHTML='';mapRows=[];
+  const found=new Set();
+  for(const s of students){const ms=Array.from((s.rawCls||'').matchAll(/\d+[A\/\.]\d+/g));if(ms.length>0){for(const m of ms)found.add(m[0]);}else if(s.rawCls)found.add(s.rawCls);}
+  for(const code of found){const m=code.match(/^(\d+)[A\/](\d+)$/);if(m)addRow(code,m[1]+'.'+m[2],m[1]);else addRow(code,code,(code.match(/^(\d+)/)||['',''])[1]);}
+}
+
+// =====================================================================
+// MAIN RUN
+// =====================================================================
+function run(download,format){
+  format=format||'csv';
+  if(!students.length)return alert('Please upload the current year Excel file first.');
+  const c={
+    school:document.getElementById('cfg-school').value.trim(),
+    year:document.getElementById('cfg-year').value.trim(),
+    cohort1:document.getElementById('cfg-cohort1').value.trim(),
+    level:document.getElementById('cfg-level').value,
+    startNum:parseInt(document.getElementById('cfg-startnum').value,10)||1,
+    uStrat:document.querySelector('input[name="uname-strat"]:checked').value
+  };
+  const YY=c.year.slice(-2);
+  const td=new Date();const tp=String(td.getDate()).padStart(2,'0')+String(td.getMonth()+1).padStart(2,'0')+String(td.getFullYear()).slice(-2);
+  const map={};for(const r of mapRows)if(r.raw.trim())map[r.raw.trim()]=r.translated.trim();
+  let ec=c.startNum;
+  rowsAll=[];rowsExisting=[];rowsNew=[];rowsSuspended=[];
+  const used=new Set();const cyKeys=new Set();
+
+  for(const s of students){
+    const DD=String(s.date.d).padStart(2,'0');const MM=String(s.date.m).padStart(2,'0');
+    const cT=norm(s.ten);const cH=norm(s.ho);
+    cyKeys.add(makeKey(cT,cH));
+    const pw=s.existingPassword||(cT+DD+MM);
+    const pd=String(ec++).padStart(3,'0');const em=tp+'_'+c.level+'_immersive_'+pd+'@emg.edu.vn';
+    let un='';let iM=false;
+    if(s.existingUsername){un=s.existingUsername;iM=true;}
+    else{
+      const mRef=refStudents.find(ref=>ref.cleanTen===cT&&ref.cleanHo===cH&&ref.username&&(!ref.dStr||ref.dStr===s.dStr));
+      if(mRef){un=mRef.username;iM=true;}
+      else{if(c.uStrat==='name-year'){const rH=removeDiacritics(s.ho).toLowerCase().trim().split(/\s+/).map(w=>w[0]||'').join('');un=(cT+rH+YY).replace(/[^a-z0-9]/g,'');}else{un=em.split('@')[0];}}
+    }
+    let fu=un;let ct=1;
+    if(!iM&&!s.existingUsername){while(globalUsernames.has(fu.toLowerCase())||used.has(fu.toLowerCase())){fu=un+ct++;}}
+    else{while(used.has(fu.toLowerCase())){fu=un+ct++;}}
+    used.add(fu.toLowerCase());un=fu;
+    const tC=map[s.rawCls]||s.rawCls.replace(/^(\d+)[A\/](\d+)$/,'$1.$2');
+    const c2=c.year+'_'+c.school+'_'+tC;
+    const gr=(tC.match(/^(\d+)/)||['','0'])[1];
+    const row=[un,s.ten,s.ho,c.cohort1,c2,c.cohort1,c2,pw,em,
+      c.year+'_IMMERSIVE_ENGLISH_'+gr,c2+'E','student',
+      c.year+'_IMMERSIVE_MATH_'+gr,c2+'M','student',
+      c.year+'_IMMERSIVE_SCIENCE_'+gr,c2+'S','student'];
+    rowsAll.push(row);
+    if(iM)rowsExisting.push(row);else rowsNew.push(row);
+  }
+
+  // Build suspended list: ref students with username, not found in current year
+  for(const ref of refStudents){
+    if(!ref.username)continue; // skip rows without username
+    if(!cyKeys.has(makeKey(ref.cleanTen,ref.cleanHo))){
+      rowsSuspended.push({username:ref.username,firstname:ref.rawFirstname||ref.cleanTen,lastname:ref.rawLastname||ref.cleanHo,checked:true});
+    }
+  }
+
+  // Update counts
+  document.getElementById('cnt-existing').textContent=rowsExisting.length+' student'+(rowsExisting.length!==1?'s':'');
+  document.getElementById('cnt-new').textContent=rowsNew.length+' student'+(rowsNew.length!==1?'s':'');
+  document.getElementById('cnt-suspended').textContent=
+    refStudents.length===0?'Upload reference file to enable':
+    rowsSuspended.length+' found (review below)';
+
+  // Enable buttons
+  ['dl-btn','dl-excel-btn','dl-existing-csv','dl-existing-xl','dl-new-csv','dl-new-xl'].forEach(function(id){const el=document.getElementById(id);if(el)el.disabled=false;});
+  if(refStudents.length>0){document.getElementById('dl-sus-csv').disabled=false;document.getElementById('dl-sus-xl').disabled=false;}
+
+  // Preview table
+  let html='<thead><tr>'+HEADERS.map(function(h){return'<th>'+h+'</th>';}).join('')+'</tr></thead><tbody>';
+  for(let i=0;i<Math.min(10,rowsAll.length);i++){const r=rowsAll[i];const isN=rowsNew.indexOf(r)!==-1;html+='<tr style="'+(isN?'background:#0a1428':'background:#091a10')+'">'+r.map(function(v){return'<td>'+v+'</td>';}).join('')+'</tr>';}
+  document.getElementById('pt').innerHTML=html+'</tbody>';
+
+  // Log
+  const ld=document.getElementById('log');ld.style.display='block';
+  ld.innerHTML='Processed <strong>'+rowsAll.length+'</strong> students.<br/>Existing (username reused): <strong>'+rowsExisting.length+'</strong> &nbsp;|&nbsp; New: <strong>'+rowsNew.length+'</strong>'+
+    (refStudents.length>0?'<br/>To suspend (not in current year): <strong>'+rowsSuspended.length+'</strong> &#8212; <em>review list below before downloading</em>':
+    '<br/><span style="color:#6b6760">No reference file &#8212; suspended list disabled.</span>')+'<br/>Ready to download!';
+
+  // Build suspended review panel
+  buildSusReviewPanel();
+
+  if(download){
+    if(format==='csv')dlCSV([HEADERS].concat(rowsAll),'IMM'+YY+' - '+c.school+' - Import HS.csv');
+    else dlExcelAll([HEADERS].concat(rowsAll),'IMM'+YY+' - '+c.school+' - Import HS.xlsx');
+  }
+}
+
+// =====================================================================
+// SUSPENDED REVIEW PANEL
+// =====================================================================
+function buildSusReviewPanel(){
+  const panel=document.getElementById('sus-review-panel');
+  const tbody=document.getElementById('sus-tbody');
+  if(rowsSuspended.length===0){panel.style.display='none';return;}
+  panel.style.display='block';
+  tbody.innerHTML='';
+  rowsSuspended.forEach(function(s,i){
+    const tr=document.createElement('tr');tr.id='sus-row-'+i;
+    tr.innerHTML='<td><input type="checkbox" class="sus-cb" checked onchange="susToggle('+i+',this.checked)"/></td>'+
+      '<td style="font-family:monospace;color:#f87171">'+s.username+'</td>'+
+      '<td>'+s.firstname+'</td>'+
+      '<td>'+s.lastname+'</td>'+
+      '<td style="color:#6b6760;font-size:.68rem">name match</td>';
+    tbody.appendChild(tr);
+  });
+  updateSusCount();
+}
+function susToggle(i,checked){
+  rowsSuspended[i].checked=checked;
+  const row=document.getElementById('sus-row-'+i);
+  if(row)row.className=checked?'':'unchecked';
+  updateSusCount();
+}
+function updateSusCount(){
+  const sel=rowsSuspended.filter(s=>s.checked).length;
+  const total=rowsSuspended.length;
+  document.getElementById('sus-sel-count').textContent=sel+' of '+total+' selected for suspension';
+}
+function toggleAllSus(btn,mode){
+  const check=mode==='check'||btn.textContent.trim()==='Check All';
+  rowsSuspended.forEach(function(s,i){s.checked=check;susToggle(i,check);});
+  // flip button text
+  document.querySelectorAll('.sus-footer .btn').forEach(function(b){b.textContent=check?'Uncheck All':'Check All';});
+  if(document.querySelector('.sus-review-header .btn'))document.querySelector('.sus-review-header .btn').textContent=check?'Uncheck All':'Check All';
+}
+
+// =====================================================================
+// SEPARATE DOWNLOADS
+// =====================================================================
+function downloadSeparate(type,format){
+  const c={school:document.getElementById('cfg-school').value.trim(),year:document.getElementById('cfg-year').value.trim()};
+  const pfx='IMM'+c.year.slice(-2)+' - '+c.school;
+  if(type==='existing'){
+    if(!rowsExisting.length)return alert('No existing students. Run Generate first.');
+    const data=[HEADERS].concat(rowsExisting);
+    if(format==='csv')dlCSV(data,pfx+' - Existing Students.csv');else dlExcelStyled(data,pfx+' - Existing Students.xlsx','FF065F46','FF86EFAC','Students');
+  }else if(type==='new'){
+    if(!rowsNew.length)return alert('No new students. Run Generate first.');
+    const data=[HEADERS].concat(rowsNew);
+    if(format==='csv')dlCSV(data,pfx+' - New Students.csv');else dlExcelStyled(data,pfx+' - New Students.xlsx','FF1E3A8A','FFBFDBFE','Students');
+  }
+}
+
+function downloadSuspended(format){
+  const c={school:document.getElementById('cfg-school').value.trim(),year:document.getElementById('cfg-year').value.trim()};
+  const pfx='IMM'+c.year.slice(-2)+' - '+c.school;
+  const selected=rowsSuspended.filter(s=>s.checked);
+  if(!selected.length)return alert('No students selected for suspension. Check at least one student in the review list below.');
+  const unchecked=rowsSuspended.length-selected.length;
+  if(unchecked>0){if(!confirm('You have unchecked '+unchecked+' student(s). Only the '+selected.length+' checked student(s) will be included in the suspended file.\n\nProceed?'))return;}
+  const data=[SUSPEND_HEADERS].concat(selected.map(s=>[s.username,s.firstname,s.lastname,1]));
+  if(format==='csv')dlCSV(data,pfx+' - Suspended Students.csv');
+  else dlExcelStyled(data,pfx+' - Suspended Students.xlsx','FF7F1D1D','FFFECACA','Suspended');
+}
+
+// =====================================================================
+// DOWNLOAD HELPERS
+// =====================================================================
+function dlCSV(data,filename){
+  const csv='\uFEFF'+data.map(function(r){return r.join(',');}).join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
+}
+function dlExcelStyled(data,filename,hArgb,rArgb,shName){
+  const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet(data);const range=XLSX.utils.decode_range(ws['!ref']);
+  for(let c=range.s.c;c<=range.e.c;c++){const cell=ws[XLSX.utils.encode_cell({r:0,c})];if(!cell)continue;cell.s={fill:{fgColor:{rgb:hArgb}},font:{bold:true,color:{rgb:'FFFFFFFF'}},alignment:{vertical:'center',horizontal:'center'}};}
+  for(let row=1;row<data.length;row++){for(let col=range.s.c;col<=range.e.c;col++){const cell=ws[XLSX.utils.encode_cell({r:row,c:col})];if(!cell)continue;cell.s={fill:{fgColor:{rgb:row%2===0?rArgb:'FF1C1A17'}}};}}
+  XLSX.utils.book_append_sheet(wb,ws,shName||'Data');XLSX.writeFile(wb,filename);
+}
+function dlExcelAll(data,filename){
+  const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet(data);const range=XLSX.utils.decode_range(ws['!ref']);
+  for(let c=range.s.c;c<=range.e.c;c++){const cell=ws[XLSX.utils.encode_cell({r:0,c})];if(!cell)continue;cell.s={fill:{fgColor:{rgb:'FF064E3B'}},font:{bold:true,color:{rgb:'FFFFFFFF'}},alignment:{vertical:'center'}};}
+  for(let row=1;row<data.length;row++){if(rowsNew.indexOf(rowsAll[row-1])===-1)continue;for(let col=range.s.c;col<=range.e.c;col++){const cell=ws[XLSX.utils.encode_cell({r:row,c:col})];if(!cell)continue;cell.s={fill:{fgColor:{rgb:'FFFEF08A'}}};}}
+  XLSX.utils.book_append_sheet(wb,ws,'All Students');XLSX.writeFile(wb,filename);
+}
+</script>
+</body>
+</html>
