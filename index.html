@@ -278,6 +278,7 @@ let students=[], mapRows=[], rowId=0;
 let refStudents=[];
 let globalUsernames=new Set();
 let rowsAll=[], rowsExisting=[], rowsNew=[], rowsSuspended=[];
+  let existingCount=0, newCount=0;
 // rowsSuspended entries: {username, firstname, lastname, checked:true}
 
 const HEADERS=['username','firstname','lastname','cohort1','cohort2','Institution','Department','password','email','course1','group1','role1','course2','group2','role2','course3','group3','role3'];
@@ -527,7 +528,7 @@ function run(download,format){
   const td=new Date();const tp=String(td.getDate()).padStart(2,'0')+String(td.getMonth()+1).padStart(2,'0')+String(td.getFullYear()).slice(-2);
   const map={};for(const r of mapRows)if(r.raw.trim())map[r.raw.trim()]=r.translated.trim();
   let ec=c.startNum;
-  rowsAll=[];rowsExisting=[];rowsNew=[];rowsSuspended=[];
+  rowsAll=[];rowsExisting=[];rowsNew=[];rowsSuspended=[]; existingCount=0; newCount=0;
   const used=new Set();const cyKeys=new Set();
 
   for(const s of students){
@@ -555,7 +556,16 @@ function run(download,format){
       c.year+'_IMMERSIVE_MATH_'+gr,c2+'M','student',
       c.year+'_IMMERSIVE_SCIENCE_'+gr,c2+'S','student'];
     rowsAll.push(row);
-    if(iM)rowsExisting.push(row);else rowsNew.push(row);
+      const blankRow = HEADERS.map(()=>'');
+      if(iM){
+        rowsExisting.push(row);
+        rowsNew.push(blankRow);
+        existingCount++;
+      }else{
+        rowsExisting.push(blankRow);
+        rowsNew.push(row);
+        newCount++;
+      }
   }
 
   // Build suspended list: ref students with username, not found in current year
@@ -567,8 +577,8 @@ function run(download,format){
   }
 
   // Update counts
-  document.getElementById('cnt-existing').textContent=rowsExisting.length+' student'+(rowsExisting.length!==1?'s':'');
-  document.getElementById('cnt-new').textContent=rowsNew.length+' student'+(rowsNew.length!==1?'s':'');
+  document.getElementById('cnt-existing').textContent=existingCount+' student'+(existingCount!==1?'s':'');
+  document.getElementById('cnt-new').textContent=newCount+' student'+(newCount!==1?'s':'');
   document.getElementById('cnt-suspended').textContent=
     refStudents.length===0?'Upload reference file to enable':
     rowsSuspended.length+' found (review below)';
@@ -584,7 +594,7 @@ function run(download,format){
 
   // Log
   const ld=document.getElementById('log');ld.style.display='block';
-  ld.innerHTML='Processed <strong>'+rowsAll.length+'</strong> students.<br/>Existing (username reused): <strong>'+rowsExisting.length+'</strong> &nbsp;|&nbsp; New: <strong>'+rowsNew.length+'</strong>'+
+  ld.innerHTML='Processed <strong>'+rowsAll.length+'</strong> students.<br/>Existing (username reused): <strong>'+existingCount+'</strong> &nbsp;|&nbsp; New: <strong>'+newCount+'</strong>'+
     (refStudents.length>0?'<br/>To suspend (not in current year): <strong>'+rowsSuspended.length+'</strong> &#8212; <em>review list below before downloading</em>':
     '<br/><span style="color:#6b6760">No reference file &#8212; suspended list disabled.</span>')+'<br/>Ready to download!';
 
@@ -643,11 +653,11 @@ function downloadSeparate(type,format){
   const c={school:document.getElementById('cfg-school').value.trim(),year:document.getElementById('cfg-year').value.trim()};
   const pfx='IMM'+c.year.slice(-2)+' - '+c.school;
   if(type==='existing'){
-    if(!rowsExisting.length)return alert('No existing students. Run Generate first.');
+    if(!existingCount)return alert('No existing students. Run Generate first.');
     const data=[HEADERS].concat(rowsExisting);
     if(format==='csv')dlCSV(data,pfx+' - Existing Students.csv');else dlExcelStyled(data,pfx+' - Existing Students.xlsx','FF065F46','FF86EFAC','Students');
   }else if(type==='new'){
-    if(!rowsNew.length)return alert('No new students. Run Generate first.');
+    if(!newCount)return alert('No new students. Run Generate first.');
     const data=[HEADERS].concat(rowsNew);
     if(format==='csv')dlCSV(data,pfx+' - New Students.csv');else dlExcelStyled(data,pfx+' - New Students.xlsx','FF1E3A8A','FFBFDBFE','Students');
   }
