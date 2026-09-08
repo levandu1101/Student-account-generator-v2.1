@@ -381,7 +381,7 @@ function parseData(rows,sheetName){
     dStr=date.d+'/'+date.m+'/'+date.y;
     let rawCls=cCls!==-1?String(r[cCls]||'').trim():'';
     if(!rawCls){const sm=sheetName.match(/\d+[a-zA-Z\/\.]\d+/);rawCls=sm?sm[0]:sheetName.replace(/^l[o]p\s*/i,'').trim();}
-    let eu=cUname!==-1?String(r[cUname]||'').trim():'';if(eu.startsWith('#'))eu='';
+    let eu=cUname!==-1?String(r[cUname]||'').trim():'';if(eu.startsWith('#'))eu='';if(eu.length<=1||eu.toLowerCase()==='yes'||eu.toLowerCase()==='co')eu='';
     let ep=cPwd!==-1?String(r[cPwd]||'').trim():'';if(ep.startsWith('#'))ep='';
     students.push({ho,ten,rawCls,date,dStr,existingUsername:eu,existingPassword:ep});
   }
@@ -534,6 +534,9 @@ function run(download,format){
   for(const s of students){
     const DD=String(s.date.d).padStart(2,'0');const MM=String(s.date.m).padStart(2,'0');
     const cT=norm(s.ten);const cH=norm(s.ho);
+      const tC=map[s.rawCls]||s.rawCls.replace(/^(\d+)[A\/](\d+)$/,'$1.$2');
+      const c2=c.year+'_'+c.school+'_'+tC;
+      const gr=(tC.match(/^(\d+)/)||['','0'])[1];
     cyKeys.add(makeKey(cT,cH));
     const pw=s.existingPassword||(cT+DD+MM);
     const pd=String(ec++).padStart(3,'0');const em=tp+'_'+c.level+'_immersive_'+pd+'@emg.edu.vn';
@@ -547,9 +550,7 @@ function run(download,format){
     let fu=un;let ct=1;
     if(!iM&&!s.existingUsername){while(globalUsernames.has(fu.toLowerCase())||used.has(fu.toLowerCase())){fu=un+ct++;}}
     used.add(fu.toLowerCase());un=fu;
-    const tC=map[s.rawCls]||s.rawCls.replace(/^(\d+)[A\/](\d+)$/,'$1.$2');
-    const c2=c.year+'_'+c.school+'_'+tC;
-    const gr=(tC.match(/^(\d+)/)||['','0'])[1];
+
     const row=[un,s.ten,s.ho,c.cohort1,c2,c.cohort1,c2,pw,em,
       c.year+'_IMMERSIVE_ENGLISH_'+gr,c2+'E','student',
       c.year+'_IMMERSIVE_MATH_'+gr,c2+'M','student',
