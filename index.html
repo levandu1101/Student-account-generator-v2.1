@@ -540,13 +540,12 @@ function run(download,format){
     let un='';let iM=false;
     if(s.existingUsername){un=s.existingUsername;iM=true;}
     else{
-      const mRef=refStudents.find(ref=>ref.cleanTen===cT&&ref.cleanHo===cH&&ref.username&&(!ref.dStr||ref.dStr===s.dStr));
-      if(mRef){un=mRef.username;iM=true;}
+      const mRef=(gr==='1') ? null : refStudents.find(ref=>ref.cleanTen===cT&&ref.cleanHo===cH&&ref.username&&!ref.used&&(!ref.dStr||!s.dStr||ref.dStr===s.dStr));
+      if(mRef){un=mRef.username;iM=true;mRef.used=true;}
       else{if(c.uStrat==='name-year'){const rH=removeDiacritics(s.ho).toLowerCase().trim().split(/\s+/).map(w=>w[0]||'').join('');un=(cT+rH+(document.getElementById('cfg-append-suffix').checked ? YY : '')).replace(/[^a-z0-9]/g,'');}else{un=em.split('@')[0];}}
     }
     let fu=un;let ct=1;
     if(!iM&&!s.existingUsername){while(globalUsernames.has(fu.toLowerCase())||used.has(fu.toLowerCase())){fu=un+ct++;}}
-    else{while(used.has(fu.toLowerCase())){fu=un+ct++;}}
     used.add(fu.toLowerCase());un=fu;
     const tC=map[s.rawCls]||s.rawCls.replace(/^(\d+)[A\/](\d+)$/,'$1.$2');
     const c2=c.year+'_'+c.school+'_'+tC;
