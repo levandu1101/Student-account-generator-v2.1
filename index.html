@@ -160,9 +160,16 @@ hr.dim{border:none;border-top:1px solid #2a2820;margin:1.25rem 0}
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- STEP 3 -->
+        <div style="margin-top:1.5rem; border-top:1px solid #e2dfd6; padding-top:1rem">
+          <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.83rem; cursor:pointer;">
+            <input type="checkbox" id="cfg-append-suffix" checked />
+            <strong>Append cohort suffix (e.g., 26) to usernames of new students</strong>
+          </label>
+        </div>
+      </div>
+    </div>
+  
+    <!-- STEP 3 -->
   <div class="card">
     <div class="card-head"><span class="step">3</span><span class="card-title">Class Mapping</span></div>
     <div class="card-body">
@@ -299,9 +306,9 @@ function parseDate(raw, yearCell){
   if(!raw&&raw!==0) return null;
   if(typeof raw==='number'&&raw>10000){const d=new Date(Math.round((raw-25569)*86400*1000));return{d:d.getDate(),m:d.getMonth()+1,y:d.getFullYear()};}
   const s=String(raw).trim();
-  let m=s.match(/(\d{1,2})\s*[\/\-\.]\s*(\d{1,2})\s*[\/\-\.]\s*(\d{2,4})/);
+  let m=s.match(/(\d{1,2})\s*[\/\-\.\|]\s*(\d{1,2})\s*[\/\-\.\|]\s*(\d{2,4})/);
   if(m){let y=parseInt(m[3],10);if(y<100)y+=(y>30?1900:2000);return{d:parseInt(m[1],10),m:parseInt(m[2],10),y};}
-  m=s.match(/(\d{1,2})\s*[\/\-\.]\s*(\d{1,2})/);
+  m=s.match(/(\d{1,2})\s*[\/\-\.\|]\s*(\d{1,2})/);
   if(m){let y=yearCell?parseInt(String(yearCell).replace(/\D/g,''),10):2018;if(isNaN(y))y=2018;if(y<100)y+=(y>30?1900:2000);return{d:parseInt(m[1],10),m:parseInt(m[2],10),y};}
   return null;
 }
@@ -534,7 +541,7 @@ function run(download,format){
     else{
       const mRef=refStudents.find(ref=>ref.cleanTen===cT&&ref.cleanHo===cH&&ref.username&&(!ref.dStr||ref.dStr===s.dStr));
       if(mRef){un=mRef.username;iM=true;}
-      else{if(c.uStrat==='name-year'){const rH=removeDiacritics(s.ho).toLowerCase().trim().split(/\s+/).map(w=>w[0]||'').join('');un=(cT+rH+YY).replace(/[^a-z0-9]/g,'');}else{un=em.split('@')[0];}}
+      else{if(c.uStrat==='name-year'){const rH=removeDiacritics(s.ho).toLowerCase().trim().split(/\s+/).map(w=>w[0]||'').join('');un=(cT+rH+(document.getElementById('cfg-append-suffix').checked ? YY : '')).replace(/[^a-z0-9]/g,'');}else{un=em.split('@')[0];}}
     }
     let fu=un;let ct=1;
     if(!iM&&!s.existingUsername){while(globalUsernames.has(fu.toLowerCase())||used.has(fu.toLowerCase())){fu=un+ct++;}}
